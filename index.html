@@ -113,6 +113,11 @@ const categories=[
                            makeBtn("LSDA"),makeBtn("RSDA")]},
   {name:"Keys", build:()=>[makeBtn("BIG"),makeBtn("SMALL"),makeBtn("ORNATE"),
                            makeBtn("RUSTY"),makeBtn("BRASS"),makeBtn("IRON")]},
+  { name: "Keycards", build: ()=>[
+      makeBtn("RED"), makeBtn("ORANGE"), makeBtn("BLUE"), makeBtn("PINK"),
+      makeBtn("PURPLE"), makeBtn("BLACK"), makeBtn("WHITE"), makeBtn("GREEN"),
+      makeBtn("YELLOW")
+  ] },
   {name:"Bosses", build:()=>[
       makeBtn("TITAN", ()=>handleBoss("TITAN")),
       makeBtn("TENDRIL", ()=>handleBoss("TENDRIL")),
@@ -307,6 +312,7 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
 
