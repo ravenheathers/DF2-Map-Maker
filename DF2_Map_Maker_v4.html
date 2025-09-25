@@ -147,7 +147,7 @@ function renderSidebar(){
   categories.forEach((cat, idx)=>{
     const wrapper=document.createElement("div");
     wrapper.className="category";
-    wrapper.draggable=true;
+    // wrapper.draggable = true;  <-- remove this
 
     const header=document.createElement("div");
     header.className="cat-header";
@@ -160,16 +160,21 @@ function renderSidebar(){
     header.appendChild(title);
 
     header.onclick=()=>{ wrapper.classList.toggle("collapsed"); arrow.textContent=wrapper.classList.contains("collapsed")?"▶":"▼"; };
+
+    // Make only the header draggable
+    header.draggable = true;
+    header.addEventListener("dragstart",(e)=>{
+      wrapper.classList.add("dragging"); 
+      e.dataTransfer.setData("text/plain",""); 
+    });
+    header.addEventListener("dragend",()=>wrapper.classList.remove("dragging"));
+
     wrapper.appendChild(header);
 
     const content=document.createElement("div");
     content.className="cat-content";
     cat.build().forEach(e=>content.appendChild(e));
     wrapper.appendChild(content);
-
-    // drag handlers
-    wrapper.addEventListener("dragstart",(e)=>{wrapper.classList.add("dragging"); e.dataTransfer.setData("text/plain","");});
-    wrapper.addEventListener("dragend",()=>wrapper.classList.remove("dragging"));
 
     sidebar.appendChild(wrapper);
   });
@@ -300,3 +305,4 @@ renderGuide();
 </script>
 </body>
 </html>
+
