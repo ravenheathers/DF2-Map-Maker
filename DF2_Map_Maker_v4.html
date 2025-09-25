@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DF2 Raid Guide Builder</title>
+<style>
+:root{--bg:#121213;--panel:#1f1f22;--muted:#999}
+html,body{height:100%;margin:0;background:var(--bg);color:#eee;font-family:system-ui,Segoe UI,Roboto,Arial}
+header{background:#0f0f10;padding:12px 16px;border-bottom:1px solid #222;display:flex;align-items:center;gap:12px}
+header h1{margin:0;font-size:18px}
+main{display:flex;height:calc(100vh - 56px);overflow:hidden}
+.sidebar{width:310px;border-right:1px solid #222;padding:10px;background:#141416;overflow:auto}
+.category{background:var(--panel);border:1px solid #2a2a2d;border-radius:8px;margin-bottom:10px;user-select:none}
+.cat-header{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;background:#171718;border-bottom:1px solid #232326}
+.cat-header .arrow{width:18px;text-align:center;opacity:.9;transition:transform .15s}
+.cat-content{padding:8px;display:block}
+.collapsed .cat-content{display:none}
+.collapsed .cat-header .arrow{transform:rotate(-90deg)}
+.btn{display:inline-block;margin:4px 4px;padding:6px 10px;border-radius:6px;border:0;background:#2f3437;color:#fff;cursor:pointer;font-size:13px}
+.btn:hover{background:#3f474b}
+.btn.secondary{background:#444}
+.btn.danger{background:#8b0000}
+.content{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.builder{display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:start}
+.builder .full{grid-column:1/-1}
+input,select,textarea{background:#0c0c0d;color:#eee;border:1px solid #222;padding:8px;border-radius:6px;font-size:14px}
+textarea{font-family:monospace;resize:none;height:420px}
+footer{padding:8px 12px;border-top:1px solid #111;color:var(--muted);font-size:13px}
+.category.dragging{opacity:.6}
+@media (max-width:900px){.sidebar{width:260px} .builder{grid-template-columns:1fr} textarea{height:260px}}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+<h1>DF2 — Raid Guide Builder</h1>
+<div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+<button class="btn" id="exportBtn">⬇ Export TXT</button>
+<button class="btn secondary" id="clearOutputBtn">Clear Output</button>
+</div>
+</header>
+
+<main>
+<aside class="sidebar" id="sidebar"></aside>
+
+<section class="content">
+<div class="builder">
+<label class="full small">Guide Title</label>
+<input id="guideTitle" class="full" placeholder="e.g. Nix Mansion">
+
+<label class="small">Floor</label>
+<label class="small">Current Path</label>
+<label class="small">Section</label>
+
+<select id="floorSelect"></select>
+<input id="path" placeholder="Click buttons to build shorthand">
+<input id="section" placeholder="e.g. Keys, Doors, Boss Room, Extras, Bosses">
+</select>
+
+<label class="small" for="note">Note / Item</label>
+<input id="note" placeholder="e.g. Rusty key, Boss room">
+<fieldset class="builder-fieldset">
+  <legend class="small">Actions</legend>
+  <div style="display:flex;gap:8px;align-items:center;grid-column:1/-1">
+    <button class="btn" id="addBtn">➕ Add to Guide</button>
+    <button class="btn secondary" id="undoBtn">⟲ Undo Last</button>
+    <button class="btn secondary" id="clearInputBtn">🧹 Clear Input</button>
+    <button class="btn danger" id="clearGuideBtn">🗑 Clear Guide</button>
+  </div>
+</fieldset>
+</div>
+</div>
+
+<textarea id="output" readonly placeholder="Final guide output will appear here..."></textarea>
+<div class="small">Tip: drag categories in the left sidebar to reorder; click the arrow to collapse/expand.</div>
+</section>
+</main>
+
+<footer>Made to help you build DF2 raid shorthand faster — enjoy 👊</footer>
+
+<script>
+let guide={Keys:[],Doors:[],"Boss Room":[],Extras:[]};
+let historyStack=[];
+let lastBoss=null;
+
+// Floor select
+const floorSelect=document.getElementById("floorSelect");
+const defOpt=document.createElement("option");
+defOpt.value=""; defOpt.textContent="-- Select Floor --";
+floorSelect.appendChild(defOpt);
+for(let i=1;i<=20;i++){
+  const o=document.createElement("option");
+  o.value=i+"F"; o.textContent=i+"F";
+  floorSelect.appendChild(o);
+}
+
+// --- Helper to create buttons
+function makeBtn(label, fn=null, cls=""){
+  const b=document.createElement("button");
+  b.className="btn"+(cls?(" "+cls):"");
+  b.textContent=label;
+  if(fn) b.onclick=fn; else b.onclick=()=>addToken(label);
+  return b;
+}
+
+// --- Sidebar categories
+const categories=[
+  {name:"Turns", build:()=>[makeBtn("TL"),makeBtn("TR")]},
+  {name:"Directions", build:()=>[makeBtn("A"),makeBtn("H")]},
+  {name:"Doors", build:()=>[makeBtn("LSD"),makeBtn("LDD"),makeBtn("RSD"),makeBtn("RDD"),
+                           makeBtn("SDA"),makeBtn("DDA"),makeBtn("RDDA"),makeBtn("LDDA"),
+                           makeBtn("LSDA"),makeBtn("RSDA")]},
+  {name:"Keys", build:()=>[makeBtn("BIG"),makeBtn("SMALL"),makeBtn("ORNATE"),
+                           makeBtn("RUSTY"),makeBtn("BRASS"),makeBtn("IRON")]},
+  {name:"Bosses", build:()=>[
+      makeBtn("TITAN", ()=>handleBoss("TITAN")),
+      makeBtn("TENDRIL", ()=>handleBoss("TENDRIL")),
+      makeBtn("CHOIR", ()=>handleBoss("CHOIR")),
+      makeBtn("FINGER HEAD", ()=>handleBoss("FINGER HEAD")),
+      makeBtn("REAPER", ()=>handleBoss("REAPER")),
+      makeBtn("SPIDER", ()=>handleBoss("SPIDER")),
+      makeBtn("SPITTER", ()=>handleBoss("SPITTER")),
+      makeBtn("TWIN", ()=>handleBoss("TWIN")),
+      makeBtn("CREEP", ()=>handleBoss("CREEP")),
+      makeBtn("HYSTERIC", ()=>handleBoss("HYSTERIC")),
+      makeBtn("CULTIST", ()=>handleBoss("CULTIST"))
+  ]},
+  {name:"Mutations", build:()=>[
+      makeBtn("CYSTIC", ()=>handleMutation("CYSTIC")),
+      makeBtn("OPTIC", ()=>handleMutation("OPTIC")),
+      makeBtn("SPINED", ()=>handleMutation("SPINED")),
+      makeBtn("SCYTHED", ()=>handleMutation("SCYTHED")),
+      makeBtn("TENTACLED", ()=>handleMutation("TENTACLED"))
+  ]},
+  {name:"Actions", build:()=>[
+      makeBtn("Undo", undo),
+      makeBtn("Clear Input", clearInput,"secondary"),
+      makeBtn("Clear Guide", clearGuide,"danger")
+  ]}
+];
+
+// --- Render sidebar
+function renderSidebar(){
+  const sidebar=document.getElementById("sidebar");
+  sidebar.innerHTML="";
+  categories.forEach((cat, idx)=>{
+    const wrapper=document.createElement("div");
+    wrapper.className="category";
+    wrapper.draggable=true;
+
+    const header=document.createElement("div");
+    header.className="cat-header";
+    const arrow=document.createElement("div");
+    arrow.className="arrow"; arrow.textContent="▼";
+    header.appendChild(arrow);
+
+    const title=document.createElement("div");
+    title.textContent=cat.name; title.style.flex="1";
+    header.appendChild(title);
+
+    header.onclick=()=>{ wrapper.classList.toggle("collapsed"); arrow.textContent=wrapper.classList.contains("collapsed")?"▶":"▼"; };
+    wrapper.appendChild(header);
+
+    const content=document.createElement("div");
+    content.className="cat-content";
+    cat.build().forEach(e=>content.appendChild(e));
+    wrapper.appendChild(content);
+
+    // drag handlers
+    wrapper.addEventListener("dragstart",(e)=>{wrapper.classList.add("dragging"); e.dataTransfer.setData("text/plain","");});
+    wrapper.addEventListener("dragend",()=>wrapper.classList.remove("dragging"));
+
+    sidebar.appendChild(wrapper);
+  });
+}
+
+// drag-over reorder logic
+const sidebar=document.getElementById("sidebar");
+sidebar.addEventListener("dragover", e=>{
+  e.preventDefault();
+  const dragging=document.querySelector(".dragging");
+  if(!dragging) return;
+  const after=getDragAfterElement(sidebar,e.clientY);
+  if(after==null) sidebar.appendChild(dragging);
+  else sidebar.insertBefore(dragging,after);
+});
+function getDragAfterElement(container,y){
+  const items=[...container.querySelectorAll('.category:not(.dragging)')];
+  return items.reduce((closest,child)=>{
+    const box=child.getBoundingClientRect();
+    const offset=y-box.top-box.height/2;
+    if(offset<0 && offset>closest.offset) return {offset:offset,element:child};
+    return closest;
+  },{offset:Number.NEGATIVE_INFINITY}).element;
+}
+
+// --- Path building
+function addToken(token){
+  const pathEl=document.getElementById("path");
+  if(lastBoss){
+    pathEl.value += (pathEl.value.trim()!==""?" - ":"") + lastBoss;
+    lastBoss=null;
+  }
+  pathEl.value += (pathEl.value.trim()!==""?" - ":"") + token;
+  historyStack.push(pathEl.value);
+}
+
+// Boss & Mutation
+function handleBoss(boss){
+  const pathEl=document.getElementById("path");
+  lastBoss=boss;
+  pathEl.value += (pathEl.value.trim()!==""?" - ":"") + boss;
+  historyStack.push(pathEl.value);
+}
+function handleMutation(mut){
+  const pathEl=document.getElementById("path");
+  if(lastBoss){
+    pathEl.value += " ("+mut+")";
+    historyStack.push(pathEl.value);
+    lastBoss=null;
+  } else addToken(mut);
+}
+
+// --- Undo / Clear
+function undo(){ historyStack.pop(); document.getElementById("path").value=historyStack.length?historyStack[historyStack.length-1]:""; lastBoss=null; }
+function clearInput(){ document.getElementById("path").value=""; document.getElementById("note").value=""; historyStack=[]; lastBoss=null; }
+function clearGuide(){ if(!confirm("Clear the entire guide?")) return; guide={Keys:[],Doors:[],"Boss Room":[],Extras:[]}; renderGuide(); }
+
+// --- Save entry
+function saveEntry(){
+  const path = document.getElementById("path").value.trim();
+  const note = document.getElementById("note").value.trim();
+  const section = document.getElementById("section").value.trim(); // now an input
+  const floor = document.getElementById("floorSelect").value;
+
+  if(!path){ 
+    alert("Path is empty — build something first."); 
+    return; 
+  }
+  if(!section){ 
+    alert("Section is empty — type a section name."); 
+    return; 
+  }
+
+  // Create the section if it doesn't exist yet
+  if(!guide[section]) guide[section] = [];
+
+  let entry = (floor ? floor + " - " : "") + path;
+  if(note) entry += " - " + note;
+
+  guide[section].push(entry);
+
+  clearInput();
+  renderGuide();
+}
+
+// --- Render guide
+function renderGuide(){
+  let out="";
+  const title=document.getElementById("guideTitle").value.trim();
+  if(title) out+=title+"\n\n";
+  for(const sec of ["Keys","Doors","Boss Room","Extras","Bosses"]){
+    if(guide[sec] && guide[sec].length){
+      out+=sec+"\n";
+      guide[sec].forEach(e=>out+="  "+e+"\n");
+      out+="\n";
+    }
+  }
+  document.getElementById("output").value=out.trim();
+  return out.trim();
+}
+
+// --- Export
+function exportTXT(){
+  const txt=renderGuide();
+  if(!txt){ alert("Guide is empty"); return; }
+  const title=document.getElementById("guideTitle").value.trim()||"DF2_Guide";
+  const blob=new Blob([txt],{type:"text/plain"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=title.replace(/[^a-z0-9\-_ ]/ig,"_")+".txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+// --- Events
+document.getElementById("addBtn").onclick=saveEntry;
+document.getElementById("undoBtn").onclick=undo;
+document.getElementById("clearInputBtn").onclick=clearInput;
+document.getElementById("clearGuideBtn").onclick=clearGuide;
+document.getElementById("exportBtn").onclick=exportTXT;
+document.getElementById("clearOutputBtn").onclick=()=>document.getElementById("output").value="";
+
+document.getElementById("note").addEventListener("keydown",e=>{if(e.key==='Enter'){ e.preventDefault(); saveEntry(); }});
+
+renderSidebar();
+renderGuide();
+</script>
+</body>
+</html>
