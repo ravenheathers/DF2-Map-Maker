@@ -262,17 +262,19 @@ function saveEntry(){
 
 // --- Render guide
 function renderGuide(){
-  let out="";
-  const title=document.getElementById("guideTitle").value.trim();
-  if(title) out+=title+"\n\n";
-  for(const sec of ["Keys","Doors","Boss Room","Extras","Bosses"]){
-    if(guide[sec] && guide[sec].length){
-      out+=sec+"\n";
-      guide[sec].forEach(e=>out+="  "+e+"\n");
-      out+="\n";
+  let out = "";
+  const title = document.getElementById("guideTitle").value.trim();
+  if (title) out += title + "\n\n";
+
+  for (const sec in guide){
+    if (guide[sec].length){
+      out += sec + "\n";
+      guide[sec].forEach(e => out += "  " + e + "\n");
+      out += "\n";
     }
   }
-  document.getElementById("output").value=out.trim();
+
+  document.getElementById("output").value = out.trim();
   return out.trim();
 }
 
@@ -305,5 +307,6 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
