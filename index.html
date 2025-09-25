@@ -94,15 +94,6 @@ for(let i=1;i<=20;i++){
   o.value=i+"F"; o.textContent=i+"F";
   floorSelect.appendChild(o);
 }
-// Door number select
-  <select id="doorNumber" class="btn">
-  <option value="">No #</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4">4</option>
-  <option value="5">5</option>
-</select>
 
 // --- Helper to create buttons
 function makeBtn(label, fn=null, cls=""){
@@ -117,26 +108,9 @@ function makeBtn(label, fn=null, cls=""){
 const categories=[
   {name:"Turns", build:()=>[makeBtn("TL"),makeBtn("TR")]},
   {name:"Directions", build:()=>[makeBtn("A"),makeBtn("H")]},
-// Helper function for door buttons with number prefix
-function makeDoorBtn(label) {
-  const b = document.createElement("button");
-  b.className = "btn";
-  b.textContent = label;
-  b.onclick = () => {
-    const num = document.getElementById("doorNumber").value;
-    addToken((num ? num : "") + label);
-  };
-  return b;
-}
-
-// Doors category with all buttons
-{ 
-  name: "Doors", 
-  build: ()=>[makeDoorBtn("LSD"), makeDoorBtn("LDD"), makeDoorBtn("RSD"), makeDoorBtn("RDD"),
-              makeDoorBtn("SDA"), makeDoorBtn("DDA"), makeDoorBtn("RDDA"), makeDoorBtn("LDDA"),
-              makeDoorBtn("LSDA"), makeDoorBtn("RSDA")
-  ] 
-}
+  {name:"Doors", build:()=>[makeBtn("LSD"),makeBtn("LDD"),makeBtn("RSD"),makeBtn("RDD"),
+                           makeBtn("SDA"),makeBtn("DDA"),makeBtn("RDDA"),makeBtn("LDDA"),
+                           makeBtn("LSDA"),makeBtn("RSDA")]},
   {name:"Keys", build:()=>[makeBtn("BIG"),makeBtn("SMALL"),makeBtn("ORNATE"),
                            makeBtn("RUSTY"),makeBtn("BRASS"),makeBtn("IRON")]},
   { name: "Keycards", build: ()=>[
@@ -338,6 +312,7 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
 
