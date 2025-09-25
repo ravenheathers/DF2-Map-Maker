@@ -236,19 +236,19 @@ function clearGuide(){ if(!confirm("Clear the entire guide?")) return; guide={Ke
 function saveEntry(){
   const path = document.getElementById("path").value.trim();
   const note = document.getElementById("note").value.trim();
-  const section = document.getElementById("section").value.trim(); // now an input
-  const floor = document.getElementById("floorSelect").value;
+  const section = document.getElementById("section").value.trim(); // input box now
+  const floor = document.getElementById("floorSelect") ? document.getElementById("floorSelect").value : "";
 
-  if(!path){ 
-    alert("Path is empty — build something first."); 
-    return; 
+  if(!path){
+    alert("Path is empty — build something first.");
+    return;
   }
-  if(!section){ 
-    alert("Section is empty — type a section name."); 
-    return; 
+  if(!section){
+    alert("Section is empty — type a section name.");
+    return;
   }
 
-  // Create the section if it doesn't exist yet
+  // Dynamically create section if it doesn't exist
   if(!guide[section]) guide[section] = [];
 
   let entry = (floor ? floor + " - " : "") + path;
@@ -305,4 +305,5 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
