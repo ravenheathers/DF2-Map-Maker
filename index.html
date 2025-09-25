@@ -106,8 +106,7 @@ function makeBtn(label, fn=null, cls=""){
 
 // --- Sidebar categories
 const categories=[
-  {name:"Turns", build:()=>[makeBtn("TL"),makeBtn("TR")]},
-  {name:"Directions", build:()=>[makeBtn("A"),makeBtn("H")]},
+  {name:"Directions", build:()=>[makeBtn("A"),makeBtn("H"),makeBtn("TL"),makeBtn("TR")]},
   {name:"Doors", build:()=>[makeBtn("LSD"),makeBtn("LDD"),makeBtn("RSD"),makeBtn("RDD"),
                            makeBtn("SDA"),makeBtn("DDA"),makeBtn("RDDA"),makeBtn("LDDA"),
                            makeBtn("LSDA"),makeBtn("RSDA")]},
@@ -312,6 +311,7 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
 
