@@ -146,6 +146,17 @@ const categories=[
   ]}
 ];
 
+//  Escape Fix
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        // Prevent ESC from messing with inputs/placeholders
+        if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA" || document.activeElement.tagName === "SELECT") {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
+});
+  
 // --- Render sidebar
 function renderSidebar(){
   const sidebar=document.getElementById("sidebar");
@@ -314,3 +325,4 @@ renderGuide();
 </script>
 </body>
 </html>
+
