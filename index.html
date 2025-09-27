@@ -118,12 +118,14 @@ const categories=[
                            makeBtn("LSDA"),makeBtn("RSDA")]},
   {name:"Keys", build:()=>[makeBtn("BIG"),makeBtn("SMALL"),makeBtn("ORNATE"),
                            makeBtn("RUSTY"),makeBtn("BRASS"),makeBtn("IRON"),
-                           makeBtn("GOLD"),makeBtn("OLD")]},
+                           makeBtn("GOLD"),makeBtn("OLD"),makeBtn("NIX")]},
   { name: "Keycards", build: ()=>[
       makeBtn("RED"), makeBtn("ORANGE"), makeBtn("BLUE"), makeBtn("PINK"),
       makeBtn("PURPLE"), makeBtn("BLACK"), makeBtn("WHITE"), makeBtn("GREEN"),
-      makeBtn("YELLOW")
-  ] },
+      makeBtn("YELLOW")]},
+  { name: "Nix Items", build: ()=>[
+      makeBtn("SHEET"), makeBtn("BEAR"), makeBtn("PHOTO"), makeBtn("COMIC"),
+      makeBtn("BASEBALL")]},
   {name:"Bosses", build:()=>[
       makeBtn("TITAN", ()=>handleBoss("TITAN")),
       makeBtn("TENDRIL", ()=>handleBoss("TENDRIL")),
@@ -326,5 +328,6 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
