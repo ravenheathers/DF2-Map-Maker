@@ -74,7 +74,7 @@ footer{padding:8px 12px;border-top:1px solid #111;color:var(--muted);font-size:1
 </div>
 
 <textarea id="output" readonly placeholder="Final guide output will appear here..."></textarea>
-<div class="small">Tip: hover a line in the output to see ❌ remove buttons; drag categories in the sidebar to reorder.</div>
+<div class="small">Tip: click any entry in the output to remove it; drag categories in the sidebar to reorder.</div>
 </section>
 </main>
 
@@ -106,15 +106,7 @@ function makeBtn(label, fn=null, cls=""){
   const b=document.createElement("button");
   b.className="btn"+(cls?(" "+cls):"");
   b.textContent=label;
-
-  if(fn){ 
-    b.onclick=fn; 
-  } else {
-    // single click = normal add
-    b.onclick=()=>addToken(label);
-    // double click = attach as door requirement
-    b.ondblclick=()=>addToken("("+label+")");
-  }
+  if(fn) b.onclick=fn; else b.onclick=()=>addToken(label);
   return b;
 }
 
@@ -124,14 +116,16 @@ const categories=[
   {name:"Doors", build:()=>[makeBtn("LSD"),makeBtn("LDD"),makeBtn("RSD"),makeBtn("RDD"),
                            makeBtn("SDA"),makeBtn("DDA"),makeBtn("RDDA"),makeBtn("LDDA"),
                            makeBtn("LSDA"),makeBtn("RSDA")]},
-  {name:"Keys", build:()=>[  makeBtn("BIG"), makeBtn("SMALL"), makeBtn("ORNATE"),
-                             makeBtn("RUSTY"), makeBtn("BRASS"), makeBtn("IRON"),
-                             makeBtn("OLD"), makeBtn("GOLD")]},
-  {name:"Keycards", build:()=>[makeBtn("RED"),makeBtn("ORANGE"),makeBtn("BLUE"),
-                           makeBtn("PINK"),makeBtn("PURPLE"),makeBtn("BLACK"),
-                           makeBtn("WHITE"),makeBtn("GREEN"),makeBtn("YELLOW")]},
-  {name:"Nix Items", build:()=>[makeBtn("SHEET"),makeBtn("BEAR"),makeBtn("PHOTO"),
-                           makeBtn("COMIC"),makeBtn("BASEBALL")]},
+  {name:"Keys", build:()=>[makeBtn("BIG"),makeBtn("SMALL"),makeBtn("ORNATE"),
+                           makeBtn("RUSTY"),makeBtn("BRASS"),makeBtn("IRON"),
+                           makeBtn("GOLD"),makeBtn("OLD"),makeBtn("NIX")]},
+  { name: "Keycards", build: ()=>[
+      makeBtn("RED"), makeBtn("ORANGE"), makeBtn("BLUE"), makeBtn("PINK"),
+      makeBtn("PURPLE"), makeBtn("BLACK"), makeBtn("WHITE"), makeBtn("GREEN"),
+      makeBtn("YELLOW")]},
+  { name: "Nix Items", build: ()=>[
+      makeBtn("SHEET"), makeBtn("BEAR"), makeBtn("PHOTO"), makeBtn("COMIC"),
+      makeBtn("BASEBALL")]},
   {name:"Bosses", build:()=>[
       makeBtn("TITAN", ()=>handleBoss("TITAN")),
       makeBtn("TENDRIL", ()=>handleBoss("TENDRIL")),
@@ -155,6 +149,17 @@ const categories=[
   ]}
 ];
 
+//  Escape Fix
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        // Prevent ESC from messing with inputs/placeholders
+        if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA" || document.activeElement.tagName === "SELECT") {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
+});
+  
 // --- Render sidebar
 function renderSidebar(){
   const sidebar=document.getElementById("sidebar");
@@ -256,23 +261,41 @@ function saveEntry(){
   renderGuide();
 }
 
-// --- Render guide with ❌ remove buttons
+// --- Render guide
 function renderGuide(){
-  const output=document.getElementById("output");
-  let out="";
-  const title=document.getElementById("guideTitle").value.trim();
-  if(title) out+=title+"\n\n";
+  let out = "";
+  const title = document.getElementById("guideTitle").value.trim();
+  if (title) out += title + "\n\n";
 
-  for(const sec in guide){
-    if(guide[sec].length){
-      out+=sec+"\n";
-      guide[sec].forEach((e,i)=>{
-        out+="  "+e+"    ❌\n";
+  for (const sec in guide){
+    if (guide[sec].length){
+      out += sec + "\n";
+      guide[sec].forEach((e,i) => {
+        out += "  " + e + "\n";
       });
-      out+="\n";
+      out += "\n";
     }
   }
-  output.value=out.trim();
+
+  const output=document.getElementById("output");
+  output.value = out.trim();
+
+  // clickable delete
+  output.onclick=(ev)=>{
+    const lines=output.value.split("\n");
+    const clickedLine=output.value.substr(0,output.selectionStart).split("\n").length-1;
+    let lineText=lines[clickedLine]?.trim();
+    if(!lineText || lineText.endsWith(":")) return;
+    if(confirm(`Remove this entry?\n\n${lineText}`)){
+      for(const sec in guide){
+        const idx=guide[sec].indexOf(lineText);
+        if(idx>-1){ guide[sec].splice(idx,1); break; }
+      }
+      renderGuide();
+    }
+  };
+
+  return out.trim();
 }
 
 // --- Export
@@ -305,3 +328,5 @@ renderGuide();
 </script>
 </body>
 </html>
+
+
