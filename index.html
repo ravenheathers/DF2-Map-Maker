@@ -38,10 +38,12 @@ footer{padding:8px 12px;border-top:1px solid #111;color:var(--muted);font-size:1
 <header>
 <h1>DF2 — Raid Guide Builder</h1>
 <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-<button class="btn" id="exportBtn">⬇ Export TXT</button>
-<button class="btn secondary" id="clearOutputBtn">Clear Output</button>
+  <button class="btn" id="copyBtn">📋 Copy</button>
+  <button class="btn" id="exportBtn">⬇ Export TXT</button>
+  <button class="btn secondary" id="clearOutputBtn">Clear Output</button>
 </div>
 </header>
+
 
 <main>
 <aside class="sidebar" id="sidebar"></aside>
@@ -159,7 +161,22 @@ document.addEventListener("keydown", function(e) {
         }
     }
 });
-  
+ 
+// --- Copy to Clipboard
+function copyToClipboard(){
+  const txt = renderGuide();
+  if(!txt){ 
+    alert("Guide is empty"); 
+    return; 
+  }
+  navigator.clipboard.writeText(txt)
+    .then(()=> alert("Guide copied to clipboard!"))
+    .catch(()=> alert("Failed to copy guide."));
+}
+
+// --- Events
+document.getElementById("copyBtn").onclick = copyToClipboard;
+
 // --- Render sidebar
 function renderSidebar(){
   const sidebar=document.getElementById("sidebar");
@@ -328,5 +345,6 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
