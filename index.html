@@ -36,50 +36,49 @@ footer{padding:8px 12px;border-top:1px solid #111;color:var(--muted);font-size:1
 </head>
 <body>
 <header>
-<h1>DF2 — Raid Guide Builder</h1>
-<div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-  <button class="btn" id="copyBtn">📋 Copy</button>
-  <button class="btn" id="exportBtn">⬇ Export TXT</button>
-  <button class="btn secondary" id="clearOutputBtn">Clear Output</button>
-</div>
+  <h1>DF2 — Raid Guide Builder</h1>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <button class="btn" id="copyBtn">📋 Copy</button>
+    <button class="btn" id="exportBtn">⬇ Export TXT</button>
+    <button class="btn secondary" id="clearOutputBtn">Clear Output</button>
+  </div>
 </header>
 
-
 <main>
-<aside class="sidebar" id="sidebar"></aside>
+  <div class="content">
+    <div class="builder">
+      <label class="full small">Guide Title</label>
+      <input id="guideTitle" class="full" placeholder="e.g. Nix Mansion">
 
-<section class="content">
-<div class="builder">
-<label class="full small">Guide Title</label>
-<input id="guideTitle" class="full" placeholder="e.g. Nix Mansion">
+      <label class="small" for="floorSelect">Floor</label>
+      <select id="floorSelect"></select>
 
-<label class="small">Floor</label>
-<label class="small">Current Path</label>
+      <label class="small" for="path">Current Path</label>
+      <input id="path" placeholder="Click buttons to build shorthand">
 
+      <label class="small" for="note">Note / Item</label>
+      <input id="note" placeholder="e.g. Rusty key, Boss room" class="full">
 
-<select id="floorSelect"></select>
-<input id="path" placeholder="Click buttons to build shorthand">
+      <fieldset class="builder-fieldset full">
+        <legend class="small">Actions</legend>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn" id="addBtn">➕ Add to Guide</button>
+          <button class="btn secondary" id="undoBtn">⟲ Undo Path</button>
+          <button class="btn secondary" id="undoEntryBtn">⟲ Undo Last Entry</button>
+          <button class="btn secondary" id="clearInputBtn">🧹 Clear Input</button>
+          <button class="btn danger" id="clearGuideBtn">🗑 Clear Guide</button>
+        </div>
+      </fieldset>
+    </div>
 
-<label class="small" for="note">Note / Item</label>
-<input id="note" placeholder="e.g. Rusty key, Boss room">
-<fieldset class="builder-fieldset">
-  <legend class="small">Actions</legend>
-  <div style="display:flex;gap:8px;align-items:center;grid-column:1/-1">
-    <button class="btn" id="addBtn">➕ Add to Guide</button>
-    <button class="btn secondary" id="undoBtn">⟲ Undo Path</button>
-    <button class="btn secondary" id="undoEntryBtn">⟲ Undo Last Entry</button>
-    <button class="btn secondary" id="clearInputBtn">🧹 Clear Input</button>
-    <button class="btn danger" id="clearGuideBtn">🗑 Clear Guide</button>
+    <textarea id="output" readonly placeholder="Final guide output will appear here..."></textarea>
+    <div class="small">Tip: click any entry in the output to remove it; drag categories in the sidebar to reorder.</div>
   </div>
-</fieldset>
-</div>
-
-<textarea id="output" readonly placeholder="Final guide output will appear here..."></textarea>
-<div class="small">Tip: click any entry in the output to remove it; drag categories in the sidebar to reorder.</div>
-</section>
 </main>
 
 <footer>Made to help you build DF2 raid shorthand faster — enjoy 👊</footer>
+
+
 
 <script>
 let guide={};
@@ -352,6 +351,7 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
 
