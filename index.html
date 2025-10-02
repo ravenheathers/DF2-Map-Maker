@@ -273,8 +273,9 @@ function saveEntry(){
 
   if(!guide[floor]) guide[floor] = [];
 
-  let entry = floor + " - " + path;
-  if(note) entry += " - " + note;
+  let entry = path;
+  if (note) entry += " - " + note;
+
 
   guide[floor].push(entry);
 
@@ -351,6 +352,7 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
 
