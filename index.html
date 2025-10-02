@@ -55,11 +55,10 @@ footer{padding:8px 12px;border-top:1px solid #111;color:var(--muted);font-size:1
 
 <label class="small">Floor</label>
 <label class="small">Current Path</label>
-<label class="small">Section</label>
+
 
 <select id="floorSelect"></select>
 <input id="path" placeholder="Click buttons to build shorthand">
-<input id="section" placeholder="e.g. Keys, Doors, Boss Room, Extras, Bosses">
 
 <label class="small" for="note">Note / Item</label>
 <input id="note" placeholder="e.g. Rusty key, Boss room">
@@ -244,7 +243,7 @@ function undo(){
 
 // --- Undo Last Entry
 function undoEntry(){
-  const sec=document.getElementById("section").value.trim();
+  const sec=document.getElementById("floorSelect").value.trim();
   if(sec && guide[sec] && guide[sec].length){
     guide[sec].pop();
     renderGuide();
@@ -261,18 +260,23 @@ function clearGuide(){ if(!confirm("Clear the entire guide?")) return; guide={};
 function saveEntry(){
   const path = document.getElementById("path").value.trim();
   const note = document.getElementById("note").value.trim();
-  const section = document.getElementById("section").value.trim();
-  const floor = document.getElementById("floorSelect") ? document.getElementById("floorSelect").value : "";
+  const floor = document.getElementById("floorSelect").value.trim();
 
-  if(!path){ alert("Path is empty — build something first."); return; }
-  if(!section){ alert("Section is empty — type a section name."); return; }
+  if(!path){ 
+    alert("Path is empty — build something first."); 
+    return; 
+  }
+  if(!floor){ 
+    alert("Floor is empty — select a floor."); 
+    return; 
+  }
 
-  if(!guide[section]) guide[section] = [];
+  if(!guide[floor]) guide[floor] = [];
 
-  let entry = (floor ? floor + " - " : "") + path;
+  let entry = floor + " - " + path;
   if(note) entry += " - " + note;
 
-  guide[section].push(entry);
+  guide[floor].push(entry);
 
   clearInput();
   renderGuide();
@@ -284,10 +288,10 @@ function renderGuide(){
   const title = document.getElementById("guideTitle").value.trim();
   if (title) out += title + "\n\n";
 
-  for (const sec in guide){
-    if (guide[sec].length){
-      out += sec + "\n";
-      guide[sec].forEach((e,i) => {
+  for (const floor in guide){
+    if (guide[floor].length){
+      out += floor + "\n";   // Floor name as the header
+      guide[floor].forEach((e,i) => {
         out += "  " + e + "\n";
       });
       out += "\n";
@@ -296,6 +300,9 @@ function renderGuide(){
 
   const output=document.getElementById("output");
   output.value = out.trim();
+
+  return out.trim();
+}
 
   // clickable delete
   output.onclick=(ev)=>{
@@ -345,6 +352,7 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
 
