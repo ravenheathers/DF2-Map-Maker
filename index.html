@@ -304,23 +304,22 @@ function renderGuide(){
   return out.trim();
 }
 
-  // clickable delete
-  output.onclick=(ev)=>{
-    const lines=output.value.split("\n");
-    const clickedLine=output.value.substr(0,output.selectionStart).split("\n").length-1;
-    let lineText=lines[clickedLine]?.trim();
-    if(!lineText || lineText.endsWith(":")) return;
-    if(confirm(`Remove this entry?\n\n${lineText}`)){
-      for(const sec in guide){
-        const idx=guide[sec].indexOf(lineText);
-        if(idx>-1){ guide[sec].splice(idx,1); break; }
-      }
-      renderGuide();
+// --- Click to delete entries
+document.getElementById("output").onclick=(ev)=>{
+  const output=document.getElementById("output");
+  const lines=output.value.split("\n");
+  const clickedLine=output.value.substr(0,output.selectionStart).split("\n").length-1;
+  let lineText=lines[clickedLine]?.trim();
+  if(!lineText || lineText.endsWith(":")) return;
+  if(confirm(`Remove this entry?\n\n${lineText}`)){
+    for(const floor in guide){
+      const idx=guide[floor].indexOf(lineText);
+      if(idx>-1){ guide[floor].splice(idx,1); break; }
     }
-  };
+    renderGuide();
+  }
+};
 
-  return out.trim();
-}
 
 // --- Export
 function exportTXT(){
@@ -352,6 +351,7 @@ renderGuide();
 </script>
 </body>
 </html>
+
 
 
 
